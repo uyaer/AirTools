@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="462" height="300">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			private var inURL:String;
+			private var exportURL:String;
+			private var prefix:String = "";
+			protected function init(event:FlexEvent):void
+			{
+				this.loadCfg();				
+			}
+			private function loadCfg():void
+			{
+				var share:SharedObject = SharedObject.getLocal("merger-json-file_path");
+				inURL = share.data.in_path;
+				exportURL = share.data.out_path;
+				prefix = share.data.prefix;
+				
+				this.debugShow();
+				
+				share.close();
+			}
+			
+			private function saveCfg():void
+			{
+				var share:SharedObject = SharedObject.getLocal("merger-json-file_path");
+				share.data.in_path = inURL;
+				share.data.out_path = exportURL; 
+				share.data.prefix = prefix; 
+				share.flush();
+				share.close();
+			}
+			
+			private function debugShow():void
+			{
+				stateTF.text = "in: "+this.inURL;
+				stateTF.text += "\nout: "+exportURL;
+				prefixInp.text = this.prefix;
+			}
+			protected function selectBtn_clickHandler(e:MouseEvent):void
+			{
+				var file:File = new File(inURL);
+				file.addEventListener(Event.SELECT,onSelect);
+				file.browseForDirectory("选择打包文件");
+			}
+			
+			private function onSelect(e:Event):void{
+				var file:File = e.currentTarget as File;
+				this.inURL = file.nativePath;
+				this.saveCfg();
+				this.debugShow();
+			}
+			
+			private function onExportSelect(e:Event):void
+			{
+				var f:File = e.currentTarget as File;
+				exportURL = f.nativePath;
+				this.prefix = this.prefixInp.text;
+				this.saveCfg();
+				this.debugShow();
+				
+				var outFile:File = new File(exportURL);
+				var file:File = new File(inURL);
+				var files:Array = file.getDirectoryListing();
+				var jsonObj:Object = {};
+				var stream:FileStream = new FileStream();
+				for (var i:int = 0; i < files.length; i++) 
+				{
+					file = files[i];
+					if(!file.isDirectory && !file.isHidden && file.extension == "json"){
+						stream.open(file,FileMode.READ);
+						var dataStr:String = stream.readUTFBytes(file.size);
+						stream.close();
+						if(!dataStr){
+							continue;
+						}
+						var tableName:String = (this.prefix||"")+file.name.replace(".json","");
+						
+						jsonObj[tableName] = JSON.parse(dataStr);
+					}
+				}
+				//	写入			
+				stream.open(outFile,FileMode.WRITE);
+				stream.writeMultiByte(JSON.stringify(jsonObj),"utf-8");
+				stream.close();
+				
+				Alert.show("打包成功！");
+			}
+			
+			protected function mergeBtn_clickHandler(e:MouseEvent):void
+			{
+				if(!inURL){
+					Alert.show("没有选择输入目录");
+					return;
+				}
+				var file:File= new File(exportURL);
+				file.addEventListener(Event.SELECT,onExportSelect);
+				file.browseForSave("保存合并后的文件");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Button id="selectDestBtn" x="29" y="27" height="26" label="选择文件目录"
+			  click="selectBtn_clickHandler(event)"/>
+	<s:Button id="mergeBtn" x="135" y="173" width="78" height="27" label="合并"
+			  click="mergeBtn_clickHandler(event)"/>
+	<s:TextArea id="stateTF" x="28" y="66" width="244" height="78"/>
+	<s:Label x="293" y="66" fontSize="14" text="添加前缀"/>
+	<s:TextInput id="prefixInp" x="293" y="86" text=""/>
+</s:Window>

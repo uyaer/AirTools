@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="390" height="300" initialize="init(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.Sheet;
+			import com.XlsxFile;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			private var inURL:String;
+			private var exportURL:String;
+			
+			protected function init(event:FlexEvent):void
+			{
+				this.loadCfg();				
+			}
+			
+			protected function selBtn_clickHandler(event:MouseEvent):void{
+				var file:File = new File(inURL);
+				file.addEventListener(Event.SELECT,onSelect);
+				file.browseForDirectory("选择打包文件");
+			}
+			
+			private function onSelect(e:Event):void{
+				var file:File = e.currentTarget as File;
+				state.text = "选择了文件夹";
+				this.inURL = file.nativePath;
+				
+				this.saveCfg();
+			}
+			
+			private function showURL():void
+			{
+				input.text = "in: "+this.inURL;
+				input.text += "\nout: "+exportURL;
+			}
+			
+			
+			protected function exportFileBtn_clickHandler(event:MouseEvent):void{
+				var file:File= new File(exportURL);
+				file.addEventListener(Event.SELECT,onExportSelect);
+				file.browseForDirectory("选择导出位置");
+			}
+			
+			private function onExportSelect(e:Event):void
+			{
+				var f:File = e.currentTarget as File;
+				exportURL = f.nativePath;
+				
+				showURL();
+				
+				this.saveCfg();
+			}
+			
+			private function saveCfg():void
+			{
+				var share:SharedObject = SharedObject.getLocal("file_path");
+				share.data.file_path = inURL;
+				share.data.out_path = exportURL;
+				share.flush();
+				share.close();
+			}
+			
+			private function loadCfg():void
+			{
+				var share:SharedObject = SharedObject.getLocal("file_path");
+				inURL = share.data.file_path;
+				exportURL = share.data.out_path;
+				
+				this.showURL();
+				
+				share.close();
+			}
+			
+			private function compressBtn_clickHandler(e:MouseEvent):void
+			{
+				if(!exportURL || !inURL){
+					Alert.show("没有选择输入或者导出目录");
+					return;
+				}
+				state.text = "打包中";
+				var outFile:File = new File(exportURL);
+				var file:File = new File(inURL);
+				var files:Array = file.getDirectoryListing();
+				var jsonObj:Object = {};
+				var stream:FileStream = new FileStream();
+				for (var i:int = 0; i < files.length; i++) 
+				{
+					file = files[i];
+					if(!file.isDirectory && !file.isHidden && file.extension == "xlsx"){
+						stream.open(file,FileMode.READ);
+						var res:Array = this.read(stream,file.size);
+						stream.close();
+						if(!res){
+							return;
+						}
+						var tableName:String = res[0];
+						var val:Array = res[1];
+						
+						if(!this.oneFileCheck.selected){
+							stream.open(outFile.resolvePath(tableName+".json"),FileMode.WRITE);
+							stream.writeMultiByte(JSON.stringify(val),"utf-8");
+							stream.close();
+						}else{
+							jsonObj[tableName] = val;
+						}
+					}
+				}
+				//				
+				if(this.oneFileCheck.selected){
+					stream.open(outFile.resolvePath("data.json"),FileMode.WRITE);
+					stream.writeMultiByte(JSON.stringify(jsonObj),"utf-8");
+					stream.close();
+				}
+				
+				Alert.show("打包成功！");
+				state.text = "未选择";
+			}
+			
+			private function read(io:FileStream,size:int):Array{
+				var byteArr:ByteArray = new ByteArray();
+				io.readBytes(byteArr,0,size);
+				var xls:XlsxFile = new XlsxFile( );
+				xls.load( byteArr );
+				var sheet:Sheet = xls.sheets[0];
+				var values:Array = sheet.values;
+				var tableName:String = values[0][0];
+				var types:Array = values[2];
+				var keys:Array = values[3];
+				var arr:Array = [];
+				for(var i:int = 4 ; i < values.length;i++){
+					var line:Array = values[i];
+					var firstCell:String = (line[0] as String).toUpperCase();
+					if(firstCell == "NO")continue;
+					var obj:Object = {};
+					arr.push(obj);
+					for(var j:int = 1; j < line.length;j++){
+						if(!keys[j])continue;
+						var str:String = line[j];
+						var type:String = (types[j] as String).toLowerCase();
+						var val:*;
+						if(type == "number" || type == "int"){
+							val = Number(str);
+						}else if(type.indexOf("bool")==0){
+							val = (str=="0"||!str)?false:true;
+						}else if(type.indexOf("array")==0 || type.indexOf("obj")==0 || type.indexOf("json")==0){
+							try{
+								val = JSON.parse(str);
+							}catch(e:*){
+								trace("error:",tableName,keys[j],i+1,str);
+								this.state.text = "error!!"+"["+tableName+"]("+keys[j]+","+(i+1)+") "+str;
+								return null;
+							}
+						}else{
+							val = str;
+						}
+						
+						obj[keys[j]] = val;
+					}
+					if(firstCell == "END")break;
+				}
+				return [tableName,arr];
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Button id="selBtn" x="29" y="11" width="93" height="32" label="选择文件夹"
+			  click="selBtn_clickHandler(event)" fontSize="14"/>
+	<s:TextArea id="input" x="29" y="101" width="321" height="103" editable="false"/>
+	<s:Button id="compressBtn" x="156" y="31" width="98" height="32" label="打包"
+			  click="compressBtn_clickHandler(event)"/>
+	<s:CheckBox id="oneFileCheck" x="273" y="37" label="导出成一个文件" selected="true"/>
+	<s:Button id="exportFileBtn" x="29" y="61" width="93" height="32" label="导出目录"
+			  click="exportFileBtn_clickHandler(event)"/>
+	<s:TextArea id="state" left="29" right="39" bottom="10" height="110"/>
+</s:Window>
