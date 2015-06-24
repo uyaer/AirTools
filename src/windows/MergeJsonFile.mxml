@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="462" height="300">
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="462" height="300" initialize="init(event)">
 	<s:layout>
 		<s:BasicLayout/>
 	</s:layout>
@@ -12,7 +12,13 @@
 			
 			private var inURL:String;
 			private var exportURL:String;
+			//前缀
 			private var prefix:String = "";
+			//精度
+			private var isDot:Boolean ;
+			//过滤key
+			private var isFilter:Boolean ;
+			private var filterStr:String = "";
 			protected function init(event:FlexEvent):void
 			{
 				this.loadCfg();				
@@ -22,7 +28,10 @@
 				var share:SharedObject = SharedObject.getLocal("merger-json-file_path");
 				inURL = share.data.in_path;
 				exportURL = share.data.out_path;
-				prefix = share.data.prefix;
+				prefix = share.data.prefix || "";
+				isDot = share.data.isDot || true;
+				isFilter = share.data.isFilter || false;
+				filterStr = share.data.filterStr || "";
 				
 				this.debugShow();
 				
@@ -35,6 +44,10 @@
 				share.data.in_path = inURL;
 				share.data.out_path = exportURL; 
 				share.data.prefix = prefix; 
+				share.data.isDot = isDot; 
+				share.data.isFilter = isFilter; 
+				share.data.filterStr = filterStr; 
+				
 				share.flush();
 				share.close();
 			}
@@ -44,6 +57,9 @@
 				stateTF.text = "in: "+this.inURL;
 				stateTF.text += "\nout: "+exportURL;
 				prefixInp.text = this.prefix;
+				dotChk.selected = this.isDot;
+				filterChk.selected = this.isFilter;
+				filterInp.text = this.filterStr;
 			}
 			protected function selectBtn_clickHandler(e:MouseEvent):void
 			{
@@ -64,6 +80,9 @@
 				var f:File = e.currentTarget as File;
 				exportURL = f.nativePath;
 				this.prefix = this.prefixInp.text;
+				this.isDot = this.dotChk.selected;
+				this.isFilter = this.filterChk.selected;
+				this.filterStr = this.filterInp.text;
 				this.saveCfg();
 				this.debugShow();
 				
@@ -84,7 +103,11 @@
 						}
 						var tableName:String = (this.prefix||"")+file.name.replace(".json","");
 						
-						jsonObj[tableName] = JSON.parse(dataStr);
+						var jsonData:Object = JSON.parse(dataStr);
+						if(this.isFilter && this.filterStr){
+							this.filter(jsonData);
+						}
+						jsonObj[tableName] = jsonData;
 					}
 				}
 				//	写入			
@@ -106,6 +129,60 @@
 				file.browseForSave("保存合并后的文件");
 			}
 			
+			/**
+			 * 过滤key
+			 */ 
+			private function filter(pJsonData:Object,pkey:String=null):void
+			{
+				var jsonData:Object = pJsonData;
+				if(pkey){
+					jsonData = jsonData[pkey];
+				}
+				var filterKeyArr:Array = this.filterStr.split(";");
+				for(var key:String in jsonData){
+					var obj:* = jsonData[key];
+					
+					if(filterKeyArr.indexOf(key)==-1){
+						if(obj is Array){
+							if(obj.length==0){
+								delete jsonData[key];
+							}else{
+								this.filter(jsonData,key);
+							}
+						}else if(this.isObj(obj)){
+							this.filter(jsonData,key);
+						}else{
+							delete jsonData[key];
+						}
+					}else{ //找到了过滤元素
+						if(this.isDot && obj is Number){ //是否过滤精度
+							jsonData[key] = Math.round(obj);
+						}
+						if(!obj){
+							delete jsonData[key];
+						}
+					}
+				}
+				
+				//将没有子元素的对象删除
+				if(pkey){
+					var count:Number = 0;
+					for(key in jsonData){
+						count++;
+						break;
+					}
+					if(count==0){
+						delete pJsonData[pkey];
+					}
+				}
+			}
+			
+			private function isObj(val:*):Boolean{
+				if(val is Number)return false;
+				if(val is String)return false;
+				return true;
+			}
+			
 		]]>
 	</fx:Script>
 	
@@ -117,6 +194,11 @@
 	<s:Button id="mergeBtn" x="135" y="173" width="78" height="27" label="合并"
 			  click="mergeBtn_clickHandler(event)"/>
 	<s:TextArea id="stateTF" x="28" y="66" width="244" height="78"/>
-	<s:Label x="293" y="66" fontSize="14" text="添加前缀"/>
-	<s:TextInput id="prefixInp" x="293" y="86" text=""/>
-</s:Window>
+	<s:Label x="293" y="28" fontSize="14" text="每个JSON文件添加前缀"/>
+	<s:TextInput id="prefixInp" x="293" y="46" text=""/>
+	<s:CheckBox id="filterChk" x="293" y="80" fontSize="14" />
+	<s:CheckBox id="dotChk" x="293" y="140" fontSize="14" />
+	<s:Label x="315" y="84" fontSize="14" text="过滤key(;分割)"/>
+	<s:Label x="315" y="143" fontSize="14" text="数字是否保留精度"/>
+	<s:TextInput id="filterInp" x="293" y="106" text=""/>
+</s:Group>

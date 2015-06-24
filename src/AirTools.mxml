@@ -8,6 +8,7 @@
 		<![CDATA[
 			import mx.managers.PopUpManager;
 			
+			import spark.components.Group;
 			import spark.components.Window;
 			
 			import windows.Excel2Json;
@@ -26,9 +27,13 @@
 				}
 				
 				if(WinCls){
-					var newWindow:Window = new WinCls(); 
-					newWindow.systemChrome = NativeWindowSystemChrome.STANDARD; 
-					newWindow.open();
+					var win:Window = new Window(); 
+					var group:Group = new WinCls();
+					win.addElement(group);
+					win.width = group.width;
+					win.height = group.height;
+					win.systemChrome = NativeWindowSystemChrome.STANDARD; 
+					win.open();
 				}
 				this.close();
 			}
