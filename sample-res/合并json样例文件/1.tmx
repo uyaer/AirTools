@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="1" height="1" tilewidth="640" tileheight="960" nextobjectid="626">
+ <tileset firstgid="1" name="1" tilewidth="2880" tileheight="640">
+  <image source="G:/HTML5/egret-games/game-16-runman/resource/map/1.png" width="2880" height="640"/>
+ </tileset>
+ <objectgroup name="bg"/>
+ <objectgroup color="#000000" name="eighth floor"/>
+ <objectgroup color="#ff00ff" name="seventh floor">
+  <object id="389" type="7" x="422.333" y="150.667" width="68" height="22"/>
+  <object id="588" type="7" x="423.333" y="304.667" width="68" height="22"/>
+ </objectgroup>
+ <objectgroup color="#00ffff" name=" sixth layer">
+  <object id="391" type="6" x="286.667" y="196.333" width="68" height="22"/>
+  <object id="581" type="6" x="287.667" y="350.333" width="68" height="22"/>
+  <object id="604" type="6" x="288.667" y="443.333" width="68" height="22"/>
+ </objectgroup>
+ <objectgroup color="#0055ff" name="fifth floor">
+  <object id="388" type="5" x="83" y="218.333" width="68" height="22"/>
+  <object id="592" type="5" x="84" y="372.333" width="68" height="22"/>
+  <object id="615" type="5" x="85" y="486.333" width="68" height="22"/>
+  <object id="622" type="5" x="81" y="277.333" width="68" height="22"/>
+  <object id="623" type="5" x="217" y="277.333" width="68" height="22"/>
+  <object id="624" type="5" x="354" y="278.333" width="68" height="22"/>
+  <object id="625" type="5" x="492" y="279.333" width="68" height="22"/>
+ </objectgroup>
+ <objectgroup color="#00ff00" name="fourth floor">
+  <object id="390" type="4" x="285.667" y="151" width="68" height="22"/>
+  <object id="392" type="4" x="559.667" y="196.333" width="68" height="22"/>
+  <object id="393" type="4" x="491" y="217.667" width="68" height="22"/>
+  <object id="577" type="4" x="492" y="371.667" width="68" height="22"/>
+  <object id="580" type="4" x="286.667" y="305" width="68" height="22"/>
+  <object id="593" type="4" x="560.667" y="350.333" width="68" height="22"/>
+  <object id="600" type="4" x="493" y="487.667" width="68" height="22"/>
+  <object id="616" type="4" x="561.667" y="443.333" width="68" height="22"/>
+ </objectgroup>
+ <objectgroup color="#ffff00" name="third layer">
+  <object id="383" type="3" x="218.667" y="218.333" width="68" height="22"/>
+  <object id="384" type="3" x="13.3333" y="195.667" width="68" height="22"/>
+  <object id="385" type="3" x="356" y="218.333" width="68" height="22"/>
+  <object id="386" type="3" x="422.667" y="195" width="68" height="22"/>
+  <object id="578" type="3" x="14.3333" y="349.667" width="68" height="22"/>
+  <object id="585" type="3" x="357" y="372.333" width="68" height="22"/>
+  <object id="590" type="3" x="219.667" y="372.333" width="68" height="22"/>
+  <object id="598" type="3" x="423.667" y="349" width="68" height="22"/>
+  <object id="601" type="3" x="15.3333" y="442.667" width="68" height="22"/>
+  <object id="608" type="3" x="358" y="487.333" width="68" height="22"/>
+  <object id="613" type="3" x="220.667" y="488.333" width="68" height="22"/>
+  <object id="621" type="3" x="424.667" y="442" width="68" height="22"/>
+ </objectgroup>
+ <objectgroup color="#ff7700" name="second floor">
+  <object id="350" type="2" x="82.5" y="171.833" width="68" height="22"/>
+  <object id="387" type="2" x="218.5" y="173.167" width="68" height="22"/>
+  <object id="394" type="2" x="559.167" y="151.167" width="68" height="22"/>
+  <object id="583" type="2" x="83.5" y="325.833" width="68" height="22"/>
+  <object id="584" type="2" x="560.167" y="305.167" width="68" height="22"/>
+  <object id="589" type="2" x="219.5" y="327.167" width="68" height="22"/>
+  <object id="606" type="2" x="84.5" y="418.833" width="68" height="22"/>
+  <object id="612" type="2" x="220.5" y="420.167" width="68" height="22"/>
+ </objectgroup>
+ <objectgroup color="#ff0000" name=" first layer">
+  <object id="79" type="1" x="13.9967" y="150.985" width="68" height="22"/>
+  <object id="352" type="1" x="150.333" y="151.5" width="68" height="22"/>
+  <object id="354" type="1" x="14.5" y="239.562" width="68" height="22"/>
+  <object id="355" type="1" x="150.333" y="195.333" width="68" height="22"/>
+  <object id="362" type="1" x="354.364" y="173.826" width="68" height="22"/>
+  <object id="364" type="1" x="150.625" y="240.062" width="68" height="22"/>
+  <object id="365" type="1" x="286.58" y="239.79" width="68" height="22"/>
+  <object id="367" type="1" x="422.705" y="239.79" width="68" height="22"/>
+  <object id="371" type="1" x="490.489" y="173.826" width="68" height="22"/>
+  <object id="373" type="1" x="558.455" y="239.79" width="68" height="22"/>
+  <object id="576" type="1" x="423.705" y="393.79" width="68" height="22"/>
+  <object id="579" type="1" x="151.333" y="349.333" width="68" height="22"/>
+  <object id="582" type="1" x="491.489" y="327.826" width="68" height="22"/>
+  <object id="586" type="1" x="287.58" y="393.79" width="68" height="22"/>
+  <object id="587" type="1" x="151.333" y="305.5" width="68" height="22"/>
+  <object id="591" type="1" x="355.364" y="327.826" width="68" height="22"/>
+  <object id="594" type="1" x="14.9967" y="304.985" width="68" height="22"/>
+  <object id="595" type="1" x="15.5" y="393.562" width="68" height="22"/>
+  <object id="596" type="1" x="151.625" y="394.062" width="68" height="22"/>
+  <object id="597" type="1" x="559.455" y="393.79" width="68" height="22"/>
+  <object id="599" type="1" x="424.705" y="486.79" width="68" height="22"/>
+  <object id="602" type="1" x="152.333" y="442.333" width="68" height="22"/>
+  <object id="605" type="1" x="492.489" y="420.826" width="68" height="22"/>
+  <object id="609" type="1" x="288.58" y="486.79" width="68" height="22"/>
+  <object id="614" type="1" x="356.364" y="420.826" width="68" height="22"/>
+  <object id="618" type="1" x="16.5" y="486.562" width="68" height="22"/>
+  <object id="619" type="1" x="152.625" y="487.062" width="68" height="22"/>
+  <object id="620" type="1" x="560.455" y="486.79" width="68" height="22"/>
+ </objectgroup>
+</map>
