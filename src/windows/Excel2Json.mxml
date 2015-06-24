@@ -119,7 +119,7 @@
 					stream.close();
 				}
 				
-				Alert.show("打包成功！");
+				Alert.show("打包成功！","",4,this);
 				state.text = "未选择";
 			}
 			
