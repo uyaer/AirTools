@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="462" height="300" initialize="init(event)">
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="462" height="300" initialize="init(event)">
 	<s:layout>
 		<s:BasicLayout/>
 	</s:layout>
@@ -95,6 +96,7 @@
 				var file:File = new File(inURL);
 				var files:Array = file.getDirectoryListing();
 				var jsonObj:Object = {};
+				var jsonObjStr:String = "{";
 				var stream:FileStream = new FileStream();
 				for (var i:int = 0; i < files.length; i++) 
 				{
@@ -112,15 +114,23 @@
 						if(this.isFilter && this.filterStr){
 							this.filter(jsonData);
 						}
-						jsonObj[tableName] = jsonData;
+						if(this.isToJs){
+							var objStr:String = JSON.stringify(jsonData).replace(/\{"/g , '{').replace(/\,"/g , ',').replace(/"\:/g , ':');
+							jsonObjStr = jsonObjStr+ '"' + tableName + '":' + objStr + ',';
+						}else{
+							jsonObj[tableName] = jsonData;
+						}
 					}
 				}
-				
 				
 				//	写入			
 				stream.open(outFile,FileMode.WRITE);
 				if(this.isToJs){
-					stream.writeMultiByte("var "+f.name.substr(0,f.name.indexOf("."))+" = "+JSON.stringify(jsonObj),"utf-8");
+					if(jsonObjStr.lastIndexOf(",")==jsonObjStr.length-1){
+						jsonObjStr = jsonObjStr.substr(0,jsonObjStr.length-1)+"}";
+					}
+					var varname:String = f.name.substr(0,f.name.indexOf("."));
+					stream.writeMultiByte("var "+varname+" = "+jsonObjStr,"utf-8");
 				}else{
 					stream.writeMultiByte(JSON.stringify(jsonObj),"utf-8");
 				}
@@ -207,9 +217,9 @@
 	<s:TextArea id="stateTF" x="28" y="66" width="244" height="78"/>
 	<s:Label x="293" y="28" fontSize="14" text="每个JSON文件添加前缀"/>
 	<s:TextInput id="prefixInp" x="293" y="46" text=""/>
-	<s:CheckBox id="filterChk" x="293" y="80" fontSize="14" />
-	<s:CheckBox id="dotChk" x="293" y="140" fontSize="14" />
-	<s:CheckBox id="toJsChk" x="293" y="170" fontSize="14" />
+	<s:CheckBox id="filterChk" x="293" y="80" fontSize="14"/>
+	<s:CheckBox id="dotChk" x="293" y="140" fontSize="14"/>
+	<s:CheckBox id="toJsChk" x="293" y="170" fontSize="14"/>
 	<s:Label x="315" y="173" fontSize="14" text="保存为js"/>
 	<s:Label x="315" y="84" fontSize="14" text="过滤key(;分割)"/>
 	<s:Label x="315" y="143" fontSize="14" text="数字是否保留精度"/>
