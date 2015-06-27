@@ -19,6 +19,7 @@
 			//过滤key
 			private var isFilter:Boolean ;
 			private var filterStr:String = "";
+			private var isToJs:Boolean ;
 			protected function init(event:FlexEvent):void
 			{
 				this.loadCfg();				
@@ -32,6 +33,7 @@
 				isDot = share.data.isDot || true;
 				isFilter = share.data.isFilter || false;
 				filterStr = share.data.filterStr || "";
+				isToJs = share.data.isToJs || false;
 				
 				this.debugShow();
 				
@@ -47,6 +49,7 @@
 				share.data.isDot = isDot; 
 				share.data.isFilter = isFilter; 
 				share.data.filterStr = filterStr; 
+				share.data.isToJs = isToJs; 
 				
 				share.flush();
 				share.close();
@@ -60,6 +63,7 @@
 				dotChk.selected = this.isDot;
 				filterChk.selected = this.isFilter;
 				filterInp.text = this.filterStr;
+				toJsChk.selected = this.isToJs;
 			}
 			protected function selectBtn_clickHandler(e:MouseEvent):void
 			{
@@ -83,6 +87,7 @@
 				this.isDot = this.dotChk.selected;
 				this.isFilter = this.filterChk.selected;
 				this.filterStr = this.filterInp.text;
+				this.isToJs = this.toJsChk.selected;
 				this.saveCfg();
 				this.debugShow();
 				
@@ -110,9 +115,15 @@
 						jsonObj[tableName] = jsonData;
 					}
 				}
+				
+				
 				//	写入			
 				stream.open(outFile,FileMode.WRITE);
-				stream.writeMultiByte(JSON.stringify(jsonObj),"utf-8");
+				if(this.isToJs){
+					stream.writeMultiByte("var "+f.name.substr(0,f.name.indexOf("."))+" = "+JSON.stringify(jsonObj),"utf-8");
+				}else{
+					stream.writeMultiByte(JSON.stringify(jsonObj),"utf-8");
+				}
 				stream.close();
 				
 				Alert.show("打包成功！","",4,this);
@@ -198,6 +209,8 @@
 	<s:TextInput id="prefixInp" x="293" y="46" text=""/>
 	<s:CheckBox id="filterChk" x="293" y="80" fontSize="14" />
 	<s:CheckBox id="dotChk" x="293" y="140" fontSize="14" />
+	<s:CheckBox id="toJsChk" x="293" y="170" fontSize="14" />
+	<s:Label x="315" y="173" fontSize="14" text="保存为js"/>
 	<s:Label x="315" y="84" fontSize="14" text="过滤key(;分割)"/>
 	<s:Label x="315" y="143" fontSize="14" text="数字是否保留精度"/>
 	<s:TextInput id="filterInp" x="293" y="106" text=""/>

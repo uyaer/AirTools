@@ -33,6 +33,8 @@
 				this.inURL = file.nativePath;
 				
 				this.saveCfg();
+				
+				this.showURL();
 			}
 			
 			private function showURL():void
@@ -81,10 +83,9 @@
 			private function compressBtn_clickHandler(e:MouseEvent):void
 			{
 				if(!exportURL || !inURL){
-					Alert.show("没有选择输入或者导出目录");
+					Alert.show("没有选择输入或者导出目录","",4,this);
 					return;
 				}
-				state.text = "打包中";
 				var outFile:File = new File(exportURL);
 				var file:File = new File(inURL);
 				var files:Array = file.getDirectoryListing();
