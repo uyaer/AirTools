@@ -179,7 +179,7 @@
 						if(this.isDot && obj is Number){ //是否过滤精度
 							jsonData[key] = Math.round(obj);
 						}
-						if(!obj){
+						if(!obj&& !(obj is Number)){
 							delete jsonData[key];
 						}
 					}

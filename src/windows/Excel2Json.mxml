@@ -12,6 +12,7 @@
 			
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
+			import mx.utils.StringUtil;
 			
 			private var inURL:String;
 			private var exportURL:String;
@@ -145,6 +146,7 @@
 						if(!keys[j])continue;
 						var str:String = line[j];
 						var type:String = (types[j] as String).toLowerCase();
+						type = StringUtil.trim(type);
 						var val:*;
 						if(type == "number" || type == "int"){
 							val = Number(str);
