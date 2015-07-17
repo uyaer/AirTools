@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="400" height="300">
+	
+	<fx:Script>
+		<![CDATA[
+
+			private var sound:Sound;
+			private var soundChannel:SoundChannel;
+			private var playTime:int = 3000;
+			
+			private var result:Array;
+
+			protected function soundFx_clickHandler(event:MouseEvent):void
+			{
+				this.result = [];
+				sound = new Sound(new URLRequest("甩葱歌.mp3"));
+				sound.addEventListener(Event.COMPLETE,this.onSoundPlay);
+				soundChannel = sound.play(playTime);
+			}
+			
+			private function onSoundPlay(e:Event):void
+			{
+				this.addEventListener(Event.ENTER_FRAME,this.loop);
+			}
+			
+			private function loop(e:Event):void
+			{
+				var byte:ByteArray = new ByteArray();
+				SoundMixer.computeSpectrum(byte);
+				this.result.push(byte.readFloat()>0?1:2);
+				
+				this.playTime+=1000;
+				if(playTime< this.sound.length){
+					this.sound.play(playTime);
+				}else{
+					trace(this.result);
+					this.removeEventListener(Event.ENTER_FRAME,this.loop);
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Button id="soundFx" x="272" y="49" label="开始" click="soundFx_clickHandler(event)"/>
+</s:Group>
