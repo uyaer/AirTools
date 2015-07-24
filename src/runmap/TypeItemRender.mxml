@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				width="143" height="118" contentBackgroundAlpha="1.0"
+				contentBackgroundColor="#ECFFDF"
+				contentBackgroundColor.select="#9CB18E">
+	
+	<fx:Script>
+		<![CDATA[
+			import event.EventManager;
+			/**
+			 * 自动产生的id，防止出现id重名情况
+			 */ 
+			public var autoId:int = -1;
+			/**
+			 * 类型id 
+			 */
+			public var typeId:int = -1;
+			/**
+			 * 编组 1-6
+			 */ 
+			public var group:int = 1;
+			/**
+			 * 名称描述
+			 */
+			public var desc:String;
+			/**
+			 * 碰撞宽
+			 */
+			public var w:int;
+			/**
+			 * 碰撞高
+			 */
+			public var h:int;
+			/**
+			 * 资源路径
+			 */ 
+			resURL:String;
+			
+			public function setData(type:int,desc:String,w:int,h:int):void{
+				this.autoId = new Date().time+int(Math.random()*1000);
+				this.typeId = type;
+				this.desc = desc;
+				this.w = w;
+				this.h = h;
+			}
+			
+			/**
+			 * 第一次创建时候自动数据
+			 */ 
+			public function newData(url:String):void{
+				this.img.source = url;
+				
+			}
+			
+			private function image1_clickHandler(e:MouseEvent):void
+			{
+				e.stopPropagation();
+				
+				if(this.typeId == -1){
+					EventManager.instance.dispatchEventWithName(RunMapEvent.ADD_NEW_RES,this.group);
+				}
+				
+			}
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="select"/>
+	</s:states>
+	
+	
+	<s:SkinnableContainer x="0" y="0" width="143" height="118" backgroundColor="#BBC989"
+						  backgroundAlpha.normal="0.0" backgroundColor.normal="#F4F4F4">
+	<s:Label id="typeLab" bottom="5" horizontalCenter="0" text="112"/>
+	<s:Image id="img" width="88" height="88" horizontalCenter="0"
+			 click="image1_clickHandler(event)" source="assets/list_add.png"
+			 verticalCenter="-9"/>
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>
+

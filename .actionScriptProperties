@@ -17,6 +17,9 @@
     <application path="AirTools.mxml">
       <airExcludes/>
     </application>
+    <application path="RunMapEditor.mxml">
+      <airExcludes/>
+    </application>
   </applications>
   <modules/>
   <buildCSSFiles/>
