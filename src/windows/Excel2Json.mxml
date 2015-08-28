@@ -7,8 +7,9 @@
 	</s:layout>
 	<fx:Script>
 		<![CDATA[
-			import com.Sheet;
-			import com.XlsxFile;
+			import com.as3xls.xls.Cell;
+			import com.as3xls.xls.ExcelFile;
+			import com.as3xls.xls.Sheet;
 			
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
@@ -95,7 +96,7 @@
 				for (var i:int = 0; i < files.length; i++) 
 				{
 					file = files[i];
-					if(!file.isDirectory && !file.isHidden && file.extension == "xlsx"){
+					if(!file.isDirectory && !file.isHidden && file.extension == "xls"){
 						stream.open(file,FileMode.READ);
 						var res:Array = this.read(stream,file.size);
 						stream.close();
@@ -125,26 +126,35 @@
 				state.text = "未选择";
 			}
 			
+			private function getCellArrValues(cells:Array):Array{
+				var arr:Array = [];
+				for(var i = 0 ; i < cells.length; i++){
+					var c:Cell = cells[i];
+					arr.push(c.value);
+				}
+				return arr;
+			}
+			
 			private function read(io:FileStream,size:int):Array{
 				var byteArr:ByteArray = new ByteArray();
-				io.readBytes(byteArr,0,size);
-				var xls:XlsxFile = new XlsxFile( );
-				xls.load( byteArr );
-				var sheet:Sheet = xls.sheets[0];
-				var values:Array = sheet.values;
+				io.readBytes(byteArr,0,0);
+				var xls:ExcelFile = new ExcelFile( );
+				xls.loadFromByteArray( byteArr );
+				var sheet:Sheet = xls.sheets.source[0];
+				var values:Array = sheet.values.source;
 				var tableName:String = values[0][0];
-				var types:Array = values[2];
-				var keys:Array = values[3];
+				var types:Array = this.getCellArrValues(values[2]);
+				var keys:Array = this.getCellArrValues(values[3]);
 				var arr:Array = [];
 				for(var i:int = 4 ; i < values.length;i++){
 					var line:Array = values[i];
-					var firstCell:String = (line[0] as String).toUpperCase();
+					var firstCell:String = (line[0].value as String).toUpperCase();
 					if(firstCell == "NO")continue;
 					var obj:Object = {};
 					arr.push(obj);
 					for(var j:int = 1; j < line.length;j++){
 						if(!keys[j])continue;
-						var str:String = line[j];
+						var str:String = line[j].value;
 						var type:String = (types[j] as String).toLowerCase();
 						type = StringUtil.trim(type);
 						var val:*;
