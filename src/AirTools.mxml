@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="206" height="160">
+					   width="206" height="242">
 	
 	<fx:Script>
 		<![CDATA[
@@ -13,6 +13,7 @@
 			
 			import windows.Excel2Json;
 			import windows.MergeJsonFile;
+			import windows.ResUnpacker;
 			import windows.SoundWave;
 			protected function toolsBtnClick(e:MouseEvent):void
 			{
@@ -27,6 +28,9 @@
 						break;
 					case this.soundFx:
 						WinCls = SoundWave;
+						break;
+					case this.unpackerBtn:
+						WinCls = ResUnpacker;
 						break;
 				}
 				
@@ -49,5 +53,6 @@
 	</fx:Declarations>
 	<s:Button id="excel2jsonBtn" x="10" y="20" label="Excel转化为JSON" click="toolsBtnClick(event)"/>
 	<s:Button id="mergeJsonFileBtn" x="10" y="66" label="合并JSON文件" click="toolsBtnClick(event)"/>
-	<s:Button id="soundFx" x="14" y="108" label="分析音乐波谱" click="toolsBtnClick(event)"/>
+	<s:Button id="soundFx" x="10" y="103" label="分析音乐波谱" click="toolsBtnClick(event)"/>
+	<s:Button id="unpackerBtn" x="10" y="150" label="切割图片" click="toolsBtnClick(event)"/>
 </s:WindowedApplication>

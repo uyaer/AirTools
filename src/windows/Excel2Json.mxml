@@ -128,7 +128,7 @@
 			
 			private function getCellArrValues(cells:Array):Array{
 				var arr:Array = [];
-				for(var i = 0 ; i < cells.length; i++){
+				for(var i:int = 0 ; i < cells.length; i++){
 					var c:Cell = cells[i];
 					arr.push(c.value);
 				}

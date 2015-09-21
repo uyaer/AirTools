@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   width="524" height="613">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.uyaer.vo.SliceVo;
+			
+			import mx.controls.Alert;
+			import mx.graphics.codec.PNGEncoder;
+			
+			private var inURL:String;
+			private var itemNameTitle:String;
+			private var txtData:String;
+			private var formatValue:String;
+			private var saveFolder:String;
+			private var bmd:BitmapData;
+			/**
+			 * 切割数据，里面是object
+			 */ 
+			private var formatDataArr:Array;
+			
+			protected function selectBtn_clickHandler(event:MouseEvent):void
+			{
+				var file:File = new File();
+				file.addEventListener(Event.SELECT,onSelect);
+				file.browseForOpen("选择图片",[new FileFilter("Image","*.jpg;*.png")]);
+			}
+			
+			private function onSelect(e:Event):void{
+				var file:File = e.currentTarget as File;
+				this.inURL = file.nativePath;
+				this.picInp.text = this.inURL;
+			}
+			
+			protected function startUnPackerBtn_clickHandler(event:MouseEvent):void
+			{
+				formatValue = formatType.selectedValue as String;
+				itemNameTitle = itemName.text;
+				txtData = txtInp.text;
+				
+				if(!itemNameTitle || !inURL || !txtData){
+					Alert.show("需要填写全部的值","",4,this);
+					return;
+				}
+				this.inURL = this.inURL.replace(/\\/g,"/");
+				this.saveFolder = this.inURL.substring(0,inURL.lastIndexOf("/"))+"/output/";
+				
+				this.startSlice();
+			}
+			
+			private function startSlice():void{
+				var picLoader:Loader = new Loader();
+				picLoader.load(new URLRequest(this.inURL));
+				picLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,onPicLoadOver);
+			}
+			
+			private function onPicLoadOver(e:Event):void{
+				var loader:Loader = (e.target as LoaderInfo).loader;
+				bmd = (loader.content as Bitmap).bitmapData;
+				
+				//加载文本
+				if(formatValue == "json"){
+//					this.onJSONText();
+				}else if(formatValue == "xml"){
+					this.onXMLText();
+				}
+			}
+			
+			private function onXMLText():void{
+				var xml:XMLDocument = new XMLDocument(txtData);
+				if(xml.hasChildNodes()){
+					var nodes:Array = xml.childNodes;
+					this.loopFindNodes(nodes);
+				}
+			}
+			
+			private function loopFindNodes(nodes:Array):void{
+				for(var i:int = 0 ; i < nodes.length; i ++){
+					var node:XMLNode = nodes[i];	
+					if(node.nodeName == itemNameTitle){
+						this.formatSliceDataByXML(node.childNodes);
+						this.slice();
+						return;
+					}else{
+						if(node.hasChildNodes()){
+							var _nodes:Array = node.childNodes;
+							this.loopFindNodes(_nodes);
+						}
+					}
+				}
+			}
+			
+			private function formatSliceDataByXML(nodes:Array):void{
+				this.formatDataArr = [];
+				for each (var node:XMLNode in nodes){
+					if(node.nodeType == 1 && node.attributes){
+						var vo:SliceVo = new SliceVo();
+						vo.x = node.attributes.x;
+						vo.y = node.attributes.y;
+						vo.w = node.attributes.width;
+						vo.h = node.attributes.height;
+						vo.regx = node.attributes.frameX;
+						vo.regy = node.attributes.frameY;
+						vo.maxW = node.attributes.frameWidth;
+						vo.maxH = node.attributes.frameHeight;
+						vo.name = node.attributes.name;
+						this.formatDataArr.push(vo);
+					}
+				}
+			}
+			
+//			private function onJSONText():void{
+//				var json:Object = JSON.parse(txtData);
+//				frames = json.frames;
+//				var animations:Object = json.animations;
+//				frameNames = new Array(frames.length);
+//				for (var name:String in animations){
+//					var index:int = animations[name][0];
+//					frameNames[index] = name.replace(/\s/g,"_");
+//				}
+//				
+//				slice();	
+//			}
+//			
+			private function slice():void{
+				var i:int = 0;
+				for each (var frame:SliceVo in this.formatDataArr){
+					var x:int = frame.x;
+					var y:int = frame.y;
+					var w:int = frame.w;
+					var h:int = frame.h;
+					var regx:int = frame.regx;
+					var regy:int = frame.regy;
+					var maxW:int = frame.maxW;
+					var maxH:int = frame.maxH;
+					var name:String = frame.name;
+
+					///////////////////方法1
+					var bmData:BitmapData = new BitmapData(w,h,true,0x0);
+					bmData.copyPixels(bmd,new Rectangle(x,y,w,h) ,new Point(0,0));
+					var png:PNGEncoder = new PNGEncoder();
+					var bytes:ByteArray = png.encode(bmData);
+					///////////////////方法2 					
+//					var bmData:BitmapData = new BitmapData(maxW,maxH,true,0x0);
+//					bmData.copyPixels(bmd,new Rectangle(x,y,w,h) ,new Point(-regx,-regy));
+//					var bytes:ByteArray = new ByteArray();
+//					bmData.encode(new Rectangle(0,0,maxW,maxH),new PNGEncoderOptions(),bytes);
+					
+					var fs:FileStream = new FileStream();
+					fs.open(new File(saveFolder+name+".png"),FileMode.WRITE);
+					fs.writeBytes(bytes);
+					fs.close();
+					bytes.clear();
+					bytes = null;
+					bmData.dispose();
+					i++;
+				}
+				bmd.dispose();
+				Alert.show("切割完成","",4,this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="formatType"/>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:TextInput id="picInp" x="86" y="9" width="354" enabled="false"/>
+	<s:Label x="10" y="9" height="22" text="选择图片文件" verticalAlign="middle"/>
+	<s:Button id="selectBtn" x="448" y="10" label="选择" click="selectBtn_clickHandler(event)"/>
+	<s:TextArea id="txtInp" x="10" y="150" width="504" height="414"/>
+	<s:Button id="startUnPackerBtn" x="10" y="582" label="开始切割"
+			  click="startUnPackerBtn_clickHandler(event)"/>
+	<s:Label x="10" y="134" text="请输入对应的文本数据"/>
+	<s:Label x="5" y="50" height="22" text="切割的Item的名称" verticalAlign="middle"/>
+	<s:Label x="5" y="97" height="22" text="切割的数据类型" verticalAlign="middle"/>
+	<s:TextInput id="itemName" x="110" y="50"/>
+	<s:HGroup x="110" y="97" width="214" gap="20">
+		<s:RadioButton label="xml" groupName="formatType" selected="true" value="xml"/>
+		<s:RadioButton label="json" groupName="formatType" value="json"/>
+	</s:HGroup>
+</s:Group>
