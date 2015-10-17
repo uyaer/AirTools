@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" 
-					   width="524" height="613">
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="524" height="613">
 	
 	<fx:Script>
 		<![CDATA[
@@ -63,7 +63,7 @@
 				
 				//加载文本
 				if(formatValue == "json"){
-//					this.onJSONText();
+					this.onJSONText();
 				}else if(formatValue == "xml"){
 					this.onXMLText();
 				}
@@ -112,8 +112,14 @@
 				}
 			}
 			
-//			private function onJSONText():void{
-//				var json:Object = JSON.parse(txtData);
+			private function onJSONText():void{
+				var json:Object = JSON.parse(txtData);
+				if(json is Array){
+					if(json[0] is Array){
+						this.analyzeJSON2Layer(json as Array);
+					}
+				}
+//				
 //				frames = json.frames;
 //				var animations:Object = json.animations;
 //				frameNames = new Array(frames.length);
@@ -121,10 +127,38 @@
 //					var index:int = animations[name][0];
 //					frameNames[index] = name.replace(/\s/g,"_");
 //				}
-//				
-//				slice();	
-//			}
-//			
+				
+				slice();	
+			}
+			
+			/**
+			 * 分析2层数组的json
+			 * [
+			 *  [{"sx":4,"sy":72,"sw":35,"sh":33},{"sx":44,"sy":76,"sw":39,"sh":29}],
+			 *  [{"sx":186,"sy":64,"sw":46,"sh":44},{"sx":244,"sy":71,"sw":50,"sh":37}]
+			 * ]
+			 * */
+			private function analyzeJSON2Layer(arr:Array):void{
+				this.formatDataArr = [];
+			    for(var i:int = 0;i < arr.length; i++){
+					var spArr:Array = arr[i];
+					for(var j:int = 0; j < spArr.length; j++){
+						var node:* = spArr[j];
+						var vo:SliceVo = new SliceVo();
+						vo.x = node["sx"];
+						vo.y = node["sy"];
+						vo.w = node["sw"];
+						vo.h = node["sh"];
+						vo.regx = node["sx"];
+						vo.regy = node["sy"];
+						vo.maxW = node["sw"];
+						vo.maxH = node["sh"];
+						vo.name = "slice_"+i+"_"+j;
+						this.formatDataArr.push(vo);
+					}
+				}
+			}
+			
 			private function slice():void{
 				var i:int = 0;
 				for each (var frame:SliceVo in this.formatDataArr){

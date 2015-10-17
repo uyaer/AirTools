@@ -2,15 +2,14 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="206" height="242">
+					   width="206" height="242" showStatusBar="false">
 	
 	<fx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
-			
 			import spark.components.Group;
 			import spark.components.Window;
 			
+			import windows.BatchDownload;
 			import windows.Excel2Json;
 			import windows.MergeJsonFile;
 			import windows.ResUnpacker;
@@ -32,6 +31,9 @@
 					case this.unpackerBtn:
 						WinCls = ResUnpacker;
 						break;
+					case this.batchdownBtn:
+						WinCls = BatchDownload;
+						break;
 				}
 				
 				if(WinCls){
@@ -42,6 +44,7 @@
 					win.height = group.height;
 					win.systemChrome = NativeWindowSystemChrome.STANDARD; 
 					win.open();
+					win.showStatusBar = false;
 				}
 				this.close();
 			}
@@ -55,4 +58,5 @@
 	<s:Button id="mergeJsonFileBtn" x="10" y="66" label="合并JSON文件" click="toolsBtnClick(event)"/>
 	<s:Button id="soundFx" x="10" y="103" label="分析音乐波谱" click="toolsBtnClick(event)"/>
 	<s:Button id="unpackerBtn" x="10" y="150" label="切割图片" click="toolsBtnClick(event)"/>
+	<s:Button id="batchdownBtn" x="10" y="179" label="批量下载" click="toolsBtnClick(event)"/>
 </s:WindowedApplication>

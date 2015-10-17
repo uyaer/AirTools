@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="733" height="442">
+	
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+
+			private var uriArr:Array;
+			private var totalLen:int;
+			private var hasLoad:int = 0
+
+			private var errorArr:Array = [];
+			private var loader:URLLoader;
+
+			private var outputTxt:String;
+			protected function download_clickHandler(e:MouseEvent):void{
+				var inputTxt:String = inputArea.text;
+				outputTxt = outputArea.text;
+				if(!inputTxt || !outputTxt)return;
+				uriArr = new Array();
+				var tempArr:Array = inputTxt.split("\n");
+				for (var i:int = 0; i < tempArr.length; i++){
+					var httpArr:Array = String(tempArr[i]).split(" ");
+					for(var index:int = httpArr.length-1; index>=0; index--){
+						if(httpArr[index].indexOf("http")==0){
+							trace(i+"---"+httpArr[index]);
+							uriArr.push(httpArr[index]);
+							break;
+						}
+					}
+				}
+				totalLen = uriArr.length;
+				hasLoad = 0;
+				errorArr = [];
+				if(hasLoad<totalLen){
+					this.load();
+				}
+			}
+			
+			private function load():void{
+				var req:URLRequest = new URLRequest(uriArr[hasLoad]);
+				
+				if(!loader){
+					loader = new URLLoader();
+					loader.dataFormat = URLLoaderDataFormat.BINARY;
+					loader.addEventListener(Event.COMPLETE,onloadComplete);
+					loader.addEventListener(IOErrorEvent.IO_ERROR,onError);
+					loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,onError);
+				}
+				loader.load(req);
+				progress.text = "progress:"+int(hasLoad/totalLen*10000)/100+"%";
+			}
+			
+			private function onError(e:Event):void{
+				errorArr.push(uriArr[hasLoad]);
+				hasLoad++;
+				if(hasLoad<totalLen){
+					this.load();
+				}
+			}
+			
+			private function onloadComplete(e:Event):void{
+				var name:String = uriArr[hasLoad];
+				if(!mucbx.selected){
+					name = name.substring(name.lastIndexOf("/"));
+				}
+				name = name.replace("http://","").replace("https://","");
+				if(name.indexOf("?")!=-1){
+					name = name.substring(0,name.indexOf("?")-1);
+				}
+				var uri:String = outputTxt+"/"+name;
+				trace(uri);
+				var file:File = new File(uri);
+				var io:FileStream = new FileStream();
+				io.open(file,FileMode.WRITE); //Write方式打开
+				var byte:ByteArray = loader.data;
+				io.writeBytes(byte);
+				io.close();
+				hasLoad++;
+				if(hasLoad<totalLen){
+					this.load();
+				}else{
+					progress.text = "下载完成";
+				}
+			}
+			
+			protected function inBtn_clickHandler(event:MouseEvent):void
+			{
+				var file:File = new File();
+				file.addEventListener(Event.SELECT,onSelect);
+				file.browseForDirectory("选择目录");
+			}
+			
+			private function onSelect(e:Event):void{
+				var file:File = e.currentTarget as File;
+				this.outputArea.text = file.nativePath;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:TextArea id="inputArea" x="10" y="46" width="402" height="386"/>
+	<s:Label x="10" y="26" text="下载路径，多路径使用回车分行"/>
+	<s:TextArea id="outputArea" x="421" y="75" width="303" height="110" enabled="false"/>
+	<s:CheckBox id="mucbx" x="420" y="204" label="是否保持原有目录" selected="true"/>
+	<s:Button id="download" x="475" y="279" width="155" height="62" label="下载"
+			  click="download_clickHandler(event)" fontSize="24"/>
+	<s:Label id="progress" x="475" y="394" text="progress:0%"/>
+	<s:Button id="inBtn" x="421" y="46" label="选择保存路径" click="inBtn_clickHandler(event)"/>
+</s:Group>
