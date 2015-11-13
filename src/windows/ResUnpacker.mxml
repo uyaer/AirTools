@@ -31,8 +31,9 @@
 			
 			private function onSelect(e:Event):void{
 				var file:File = e.currentTarget as File;
-				this.inURL = file.nativePath;
+				this.inURL = Capabilities.os.indexOf("Mac")>-1?file.url:file.nativePath;
 				this.picInp.text = this.inURL;
+			
 			}
 			
 			protected function startUnPackerBtn_clickHandler(event:MouseEvent):void
@@ -46,7 +47,9 @@
 					return;
 				}
 				this.inURL = this.inURL.replace(/\\/g,"/");
-				this.saveFolder = this.inURL.substring(0,inURL.lastIndexOf("/"))+"/output/";
+				var fileName:String = this.inURL.substring(inURL.lastIndexOf("/")+1);
+				fileName = fileName.substring(0,fileName.indexOf("."));
+				this.saveFolder = this.inURL.substring(0,inURL.lastIndexOf("/"))+"/"+fileName+"_output/";
 				
 				this.startSlice();
 			}
@@ -114,10 +117,13 @@
 			
 			private function onJSONText():void{
 				var json:Object = JSON.parse(txtData);
-				if(json is Array){
-					if(json[0] is Array){
-						this.analyzeJSON2Layer(json as Array);
-					}
+				if(!(json is Array)){
+					json = json["frames"];
+				}
+				if(json[0] is Array){
+					this.analyzeJSON2Layer(json as Array);
+				}else{
+					this.analyzeJSONLayer(json as Array);
 				}
 //				
 //				frames = json.frames;
@@ -157,6 +163,39 @@
 						this.formatDataArr.push(vo);
 					}
 				}
+			}
+			/**
+			 * 分析1层数组的json
+			 * [
+			 *  [{"sx":4,"sy":72,"sw":35,"sh":33},{"sx":44,"sy":76,"sw":39,"sh":29}],
+			 *  [{"sx":186,"sy":64,"sw":46,"sh":44},{"sx":244,"sy":71,"sw":50,"sh":37}]
+			 * ]
+			 * */
+			private function analyzeJSONLayer(arr:Array):void{
+				this.formatDataArr = [];
+			    for(var i:int = 0;i < arr.length; i++){
+					var node:* = arr[i];
+					var vo:SliceVo = new SliceVo();
+					this.formatDataArr.push(vo);
+					if(node["filename"] && node["frame"] && node["sourceSize"]){
+						this.matchNode1(vo,node,i);
+					}
+				}
+			}
+			
+			/**
+			 * {"filename":"gui_shop_back","frame":{"x":1,"y":1,"w":518,"h":811},"rotated": false,"sourceSize":{"w":518,"h":811}}
+			 */ 
+			private function matchNode1(vo:SliceVo,node:Object,i:int):void{
+				vo.x = node["frame"]["x"];
+				vo.y = node["frame"]["y"];
+				vo.w = node["frame"]["w"];
+				vo.h = node["frame"]["h"];
+				vo.regx = node["frame"]["x"];
+				vo.regy = node["frame"]["y"];
+				vo.maxW = node["sourceSize"]["w"];
+				vo.maxH = node["sourceSize"]["h"];
+				vo.name = node["filename"];
 			}
 			
 			private function slice():void{
