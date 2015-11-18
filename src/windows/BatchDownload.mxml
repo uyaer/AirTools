@@ -74,8 +74,11 @@
 					name = name.substring(0,name.indexOf("?")-1);
 				}
 				var uri:String = outputTxt+"/"+name;
-				trace(uri);
 				var file:File = new File(uri);
+				var parent = file.parent;
+				if(!parent.exists){
+					parent.createDirectory();
+				}
 				var io:FileStream = new FileStream();
 				io.open(file,FileMode.WRITE); //Write方式打开
 				var byte:ByteArray = loader.data;
