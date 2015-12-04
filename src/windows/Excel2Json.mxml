@@ -149,7 +149,7 @@
 				var arr:Array = [];
 				for(var i:int = 4 ; i < values.length;i++){
 					var line:Array = values[i];
-					var firstCell:String = (line[0].value as String).toUpperCase();
+					var firstCell:String = (line[0].toString()).toUpperCase();
 					if(firstCell == "NO")continue;
 					var obj:Object = {};
 					arr.push(obj);

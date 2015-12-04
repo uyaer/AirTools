@@ -142,7 +142,7 @@
 			protected function mergeBtn_clickHandler(e:MouseEvent):void
 			{
 				if(!inURL){
-					Alert.show("没有选择输入目录");
+					Alert.show("没有选择输入目录","",4,this);
 					return;
 				}
 				var file:File= new File(exportURL);
