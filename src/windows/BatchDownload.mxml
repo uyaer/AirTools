@@ -12,7 +12,7 @@
 
 			private var uriArr:Array;
 			private var totalLen:int;
-			private var hasLoad:int = 0
+			private var hasLoad:int = 0;
 
 			private var errorArr:Array = [];
 			private var loader:URLLoader;
@@ -43,7 +43,12 @@
 			}
 			
 			private function load():void{
-				var req:URLRequest = new URLRequest(uriArr[hasLoad]);
+				var url:String = uriArr[hasLoad];
+				var req:URLRequest = new URLRequest(url);
+				req.userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36";
+				if(url.indexOf("png")>0||url.indexOf("jpg")>0){
+					req.requestHeaders.push(new URLRequestHeader("Accept","image/png,image/*;q=1.0,*/*;q=1.0"));
+				}
 				
 				if(!loader){
 					loader = new URLLoader();

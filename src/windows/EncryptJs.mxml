@@ -16,6 +16,9 @@
 			
 			private var inURL:String;
 			private var exportURL:String;
+			
+			private var egretVersion:int = 1;
+			
 			protected function init(event:FlexEvent):void
 			{
 				this.loadCfg();				
@@ -60,7 +63,11 @@
 			private function encryptJs():void
 			{
 				var outFile:File = new File(inURL).resolvePath("game.min.js");
-				var file:File = new File(inURL).resolvePath("main.min.js");
+				var file:File = new File(inURL).resolvePath("launcher/game-min.js");
+				if(!file.exists){
+					this.egretVersion = 2;
+					file = new File(inURL).resolvePath("main.min.js");
+				}
 				
 				//读取数据
 				var stream:FileStream = new FileStream();
@@ -117,8 +124,12 @@
 				var dataStr:String = stream.readUTFBytes(file.size);
 				stream.close();
 //				dataStr= dataStr.replace(/\s+/gm," ");
-				dataStr= dataStr.replace('<script src="main.min.js"></script>',"");
-				dataStr= dataStr.replace('egret.runEgret();',"");
+				if(egretVersion==1){
+					
+				}else if(egretVersion==2){
+					dataStr= dataStr.replace('<script src="main.min.js"></script>',"");
+					dataStr= dataStr.replace('egret.runEgret();',"");
+				}
 				//	写入			
 				stream.open(file,FileMode.WRITE);
 				stream.writeUTFBytes(dataStr);
@@ -132,7 +143,9 @@
 					return;
 				}
 				this.encryptJs();
-				this.updatIndexHtml();
+				if(egretVersion==2){
+					this.updatIndexHtml();
+				}
 				
 				Alert.show("加密成功！","",4,this);
 			}
