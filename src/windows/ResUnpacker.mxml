@@ -123,7 +123,11 @@
 				if(json[0] is Array){
 					this.analyzeJSON2Layer(json as Array);
 				}else{
-					this.analyzeJSONLayer(json as Array);
+					if(json is Array){
+						this.analyzeJSONLayer(json as Array);
+					}else{
+						this.analyzeJSONObjLayer(json);
+					}
 				}
 //				
 //				frames = json.frames;
@@ -182,6 +186,23 @@
 					}
 				}
 			}
+			/**
+			 * 分析1层对象的json
+			 * {
+			 * 		"piantou_bg_png":{"x":599,"y":1,"w":640,"h":391,"offX":0,"offY":0,"sourceW":640,"sourceH":391},
+			 * 		"piantou_duibai_png":{"x":1603,"y":1,"w":436,"h":265,"offX":0,"offY":0,"sourceW":436,"sourceH":265}
+ 			 * }
+			 * */
+			private function analyzeJSONObjLayer(data:Object):void{
+				this.formatDataArr = [];
+			    for(var key:String in data){
+					var node:* = data[key];
+					var vo:SliceVo = new SliceVo();
+					vo.name = key;
+					this.formatDataArr.push(vo);
+					this.matchNode2(vo,node);
+				}
+			}
 			
 			/**
 			 * {"filename":"gui_shop_back","frame":{"x":1,"y":1,"w":518,"h":811},"rotated": false,"sourceSize":{"w":518,"h":811}}
@@ -197,6 +218,19 @@
 				vo.maxH = node["sourceSize"]["h"];
 				vo.name = node["filename"];
 			}
+			/**
+			 * "piantou_bg_png":{"x":599,"y":1,"w":640,"h":391,"offX":0,"offY":0,"sourceW":640,"sourceH":391},
+			 */ 
+			private function matchNode2(vo:SliceVo,node:Object):void{
+				vo.x = node["x"];
+				vo.y = node["y"];
+				vo.w = node["w"];
+				vo.h = node["h"];
+				vo.regx = node["offX"];
+				vo.regy = node["offY"];
+				vo.maxW = node["sourceW"];
+				vo.maxH = node["sourceH"];
+			}
 			
 			private function slice():void{
 				var i:int = 0;
@@ -210,10 +244,11 @@
 					var maxW:int = frame.maxW;
 					var maxH:int = frame.maxH;
 					var name:String = frame.name;
+					name = name.replace("_png","").replace("_jpg","");
 
 					///////////////////方法1
-					var bmData:BitmapData = new BitmapData(w,h,true,0x0);
-					bmData.copyPixels(bmd,new Rectangle(x,y,w,h) ,new Point(0,0));
+					var bmData:BitmapData = new BitmapData(maxW,maxH,true,0x0);
+					bmData.copyPixels(bmd,new Rectangle(x,y,w,h) ,new Point(regx,regy));
 					var png:PNGEncoder = new PNGEncoder();
 					var bytes:ByteArray = png.encode(bmData);
 					///////////////////方法2 					
