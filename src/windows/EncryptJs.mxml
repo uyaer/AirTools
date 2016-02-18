@@ -110,7 +110,6 @@
 				stream.writeBytes(buffer);
 				stream.close();
 				
-				this.stateTF.text = codeArr.toString();
 				buffer.clear();
 			}
 			/**
