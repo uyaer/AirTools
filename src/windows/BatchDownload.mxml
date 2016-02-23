@@ -76,7 +76,7 @@
 				}
 				name = name.replace("http://","").replace("https://","").replace(":","");
 				if(name.indexOf("?")!=-1){
-					name = name.substring(0,name.indexOf("?")-1);
+					name = name.substring(0,name.indexOf("?"));
 				}
 				var uri:String = outputTxt+"/"+name;
 				var file:File = new File(uri);

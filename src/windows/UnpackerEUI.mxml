@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="462" height="422" initialize="init(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import flash.globalization.StringTools;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.utils.StringUtil;
+			
+			private var outURL:String;
+			private var euiTxt:String;
+			
+			protected function init(event:FlexEvent):void
+			{
+				this.loadCfg();				
+			}
+			private function loadCfg():void
+			{
+				var share:SharedObject = SharedObject.getLocal("unpacker-eui-folder_path");
+				outURL = share.data.in_path;
+				
+				this.debugShow();
+				
+				share.close();
+			}
+			
+			private function saveCfg():void
+			{
+				var share:SharedObject = SharedObject.getLocal("unpacker-eui-folder_path");
+				share.data.in_path = outURL;
+				
+				share.flush();
+				share.close();
+			}
+			
+			private function debugShow():void
+			{
+				stateTF.text = "out:"+this.outURL;
+			}
+			protected function selectBtn_clickHandler(e:MouseEvent):void
+			{
+				var file:File = new File(outURL);
+				file.addEventListener(Event.SELECT,onSelect);
+				file.browseForDirectory("选择打包文件");
+			}
+			
+			private function onSelect(e:Event):void{
+				var file:File = e.currentTarget as File;
+				outURL = file.nativePath;
+				this.saveCfg();
+				this.debugShow();
+			}
+			
+			/**
+			 * 更新index.html文件
+			 */ 
+			private function unpackerEUI():void{
+				var data:Object = JSON.parse(this.euiTxt);
+				var arr:Array = data["exmls"];
+				for(var i:int = 0 ; i < arr.length;i++){
+					var item:Object = arr[i];
+					this.saveOneEUIFile(item["path"],item["content"]);
+				}
+			}
+			
+			private function saveOneEUIFile(url:String , str:String):void{
+				//	写入	
+				var file:File = new File(outURL).resolvePath(url);
+				var stream:FileStream = new FileStream();
+				stream.open(file,FileMode.WRITE);
+				stream.writeUTFBytes(str);
+				stream.close();
+			}
+			
+			protected function unpackerBtn_clickHandler(e:MouseEvent):void
+			{
+				if(!outURL){
+					Alert.show("没有选择输入目录","",4,this);
+					return;
+				}
+				this.euiTxt = this.euiInp.text;
+				if(!this.euiTxt){
+					Alert.show("eui没有内容","",4,this);
+				}
+				
+				this.unpackerEUI();
+				
+				Alert.show("拆分成功！","",4,this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Button id="selectDestBtn" x="29" y="27" height="26" label="选择文件目录"
+			  click="selectBtn_clickHandler(event)"/>
+	<s:Button id="unpackerBtn" x="190" bottom="7" width="78" height="27" label="拆分"
+			  click="unpackerBtn_clickHandler(event)"/>
+	<s:TextArea id="stateTF" x="28" y="66" width="424" height="56"/>
+	<s:TextArea id="euiInp" x="28" y="154" width="424" height="226"/>
+	<s:Label x="28" y="130" text="eui内容"/>
+</s:Group>

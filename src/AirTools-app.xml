@@ -34,7 +34,7 @@
 
 	<!-- Description, displayed in the AIR application installer.
 	May have multiple values for each language. See samples or xsd schema file. Optional. -->
-	<!-- <description></description> -->
+	<description>修复加密卡死现象</description>
 
 	<!-- Copyright information. Optional -->
 	<!-- <copyright></copyright> -->
