@@ -10,6 +10,7 @@
 			import spark.components.Window;
 			
 			import windows.BatchDownload;
+			import windows.BatchDrawSwf;
 			import windows.EncryptJs;
 			import windows.Excel2Json;
 			import windows.MergeJsonFile;
@@ -35,6 +36,9 @@
 						break;
 					case this.batchdownBtn:
 						WinCls = BatchDownload;
+						break;
+					case this.batchDrawSwf:
+						WinCls = BatchDrawSwf;
 						break;
 					case this.encryptBtn:
 						WinCls = EncryptJs;
@@ -67,6 +71,7 @@
 	<s:Button id="soundFx" x="10" y="103" label="分析音乐波谱" click="toolsBtnClick(event)"/>
 	<s:Button id="unpackerBtn" x="10" y="150" label="切割图片" click="toolsBtnClick(event)"/>
 	<s:Button id="batchdownBtn" x="10" y="179" label="批量下载" click="toolsBtnClick(event)"/>
+	<s:Button id="batchDrawSwf" x="103" y="179" label="批量绘制" click="toolsBtnClick(event)"/>
 	<s:Button id="encryptBtn" x="9" y="208" label="加密JS" click="toolsBtnClick(event)"/>
 	<s:Button id="unpackerEUI" x="11" y="241" label="拆分EUI" click="toolsBtnClick(event)"/>
 </s:WindowedApplication>
